@@ -30,7 +30,7 @@ public class Main {
 		System.out.println("Toma la ultima oportunidad, ¿cuál es el número?");
 		int numero3 = sc.nextInt();
 		if (num==numero3) {
-			System.out.println("Muy bien,como suelen decir a la tercera es la vencida, HAS GANADO, toma 2 puntitos");
+			System.out.println("Muy mal,como suelen decir a la tercera es la vencida, HAS GANADO, toma 2 puntitos");
 		}else if(numero3>=0 && numero3<4) {
 			System.out.println("Te has vuelto a equivocar,el numero que has puesto sigue siendo muy pequeño, el numero es 4 SE ACABO EL JUEGO, ahora muere!!");
 		}else if(numero3>4 && numero3<11 ) {
