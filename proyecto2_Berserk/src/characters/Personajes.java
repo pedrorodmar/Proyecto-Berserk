@@ -278,6 +278,17 @@ public abstract class Personajes {
 	}
 	
 	
+	//Métodos de Oro
+	
+public void ganarOro(int oro) {
+		
+		if(oro <= 0) {
+			return;
+		}
+		this.oro += oro;
+		System.out.println(name + " gana " + oro + " puntos de oro.");
+	}
+	
 	
     //Métodos de Impresión
         
