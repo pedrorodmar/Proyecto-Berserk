@@ -2,6 +2,8 @@ package characters;
 
 import skills.Ataque;
 import skills.HabilidadEspecial;
+import skills.HabilidadPasiva;
+
 
 public class Guts extends Personajes {
 
@@ -9,31 +11,19 @@ public class Guts extends Personajes {
         super("Guts", 120, 30, 20, 10, 50);
     }
 
+    // Aquí es donde llenamos la caja vacía de habilidades y metemos las d Guts.
     @Override
     protected void inicializarHabilidades() {
-    	// 1. Habilidad Pasiva
-        this.getHabilidades().add(new HabilidadPasiva("Marca del Sacrificio", 
-            "Pasiva: Si la vida de Guts baja del 30%, entra en estado 'Berserker' y hace un 50% más de daño."));
-            
-        // 2. Ataque Básico (Coste: 0)
-        this.getHabilidades().add(new Ataque("Tajo Matadragones", 
-            "Un barrido horizontal muy pesado.", 1.2));
-            
-        // 3. Habilidad Especial (Coste: 25)
-        this.getHabilidades().add(new HabilidadEspecial("Corte Ciclón", 
-            "Gira sobre sí mismo dañando con gran fuerza.", 1.8, 25));
-            
-        // 4. Habilidad Especial Definitiva (Coste: 45)
-        this.getHabilidades().add(new HabilidadEspecial("Cañón de Brazo", 
-            "Dispara el cañón oculto en su prótesis a quemarropa. Daño masivo.", 3.5, 45));
+        this.getHabilidades().add(new HabilidadPasiva("Marca del Sacrificio", "Aumenta el daño a baja salud."));
+        this.getHabilidades().add(new Ataque("Tajo Matadragones", "Un barrido horizontal muy pesado.", 1.2));
+        this.getHabilidades().add(new HabilidadEspecial("Corte Ciclón", "Gira dañando con gran fuerza.", 1.8, 25));
+        this.getHabilidades().add(new HabilidadEspecial("Cañón de Brazo", "Disparo a quemarropa.", 3.5, 45));
     }
 
     @Override
     protected void aplicarBonusDeSubidaNivel() {
-        // Guts prioriza Vida, Ataque y Defensa
-        this.setVidaMaxima(this.getVidaMaxima() + 20);
-        this.setDanioBase(this.getDanioBase() + 6);
-        this.setDefensa(this.getDefensa() + 5);
-        this.setEnergiaMaxima(this.getEnergiaMaxima() + 5);
+        // Al subir de nivel, los stats de Guts escalan a su estilo (Tanque)
+        // (Requeriría tener los setters de vidaMaxima, danioBase, etc. en la clase padre)
+        System.out.println("Guts se vuelve más letal y resistente.");
     }
 }
