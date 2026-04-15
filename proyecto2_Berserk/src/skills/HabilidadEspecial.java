@@ -8,7 +8,6 @@ public class HabilidadEspecial extends Habilidades {
 }
 
 
-
 //La Pasiva se guarda en la lista pero tiene lógica interna distinta.
 public class HabilidadPasiva extends Habilidades {
  public HabilidadPasiva(String nombre, String descripcion) {
