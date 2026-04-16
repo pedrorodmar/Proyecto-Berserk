@@ -10,7 +10,8 @@ import inventory.Item.TipoItem;
 
 public class Tienda {
 
-
+	private static final int Max_Items_Catalogos = 10;
+	
 	private List<Item> catalogo;
 	private boolean itemGratisDisponible;
 	private Item itemRecompensa;
@@ -19,19 +20,19 @@ public class Tienda {
 	private Scanner scanner;
 	
 	public Tienda() {
-		
+		this.catalogo = new ArrayList<>();
+		this.itemGratisDisponible = true;
+		this.mensajesBienvenida = new ArrayList<>();
+		inicializarCatalogo();
+		inicializarMensajes();
+		this.itemGratisDisponible = generarItemRecompensa();
 	}
 	
 	public void mostrarCatalogo() {
 		
 		System.out.println("\n── CATÁLOGO ─────────────────────────────────────────");
-        for (int i = 0; i < catalogo.size(); i++) {
-            System.out.printf("[%2d] %s%n", i + 1, catalogo.get(i).toString());
-        }
-        if (itemGratisDisponible) {
-            System.out.println("\n[*] Tienes un objeto GRATIS disponible. Escribe 0 para reclamarlo.");
-        }
-        System.out.println("[X]  Salir de la tienda");
+        mostrarItemGratis();
+        mostrarStockDisponible();
         System.out.println("─────────────────────────────────────────────────────");
 		
 		
@@ -39,61 +40,27 @@ public class Tienda {
 	}
 	
 	public void comprarItem(Personajes personaje) {
-		mostrarMensajeBienvenida();
-
-        boolean enTienda = true;
-
-        while (enTienda) {
-            mostrarCatalogo();
-            System.out.printf("Oro disponible: %d%n", personaje.getOro());
-            System.out.print("Elige opción: ");
-            String entrada = scanner.nextLine().trim();
-
-            if (entrada.equalsIgnoreCase("X")) {
-                System.out.println("\"Que la espada te acompañe.\"");
-                enTienda = false;
-
-            } else if (entrada.equals("0") && itemGratisDisponible) {
-                reclamarItem(personaje);
-
-            } else {
-                    int opcion = Integer.parseInt(entrada) - 1;
-
-                    if (opcion < 0 || opcion >= catalogo.size()) {
-                        System.out.println("Opción no válida. Elige un número de la lista.");
-                        continue;
-                    }
-
-                    Item seleccionado = catalogo.get(opcion);
-
-                    if (!jugadorPuedePermitirse(seleccionado, personaje)) {
-                        System.out.printf("No tienes suficiente oro. Necesitas %d y tienes %d.%n",
-                                seleccionado.getPrecio(), personaje.getOro());
-                        continue;
-                    }
-
-                    cobrarOro(seleccionado, personaje);
-                    entregarItem(seleccionado, personaje);
-
-                
-                }
-            }
+		if(!itemEstaEnCatalago(item)) {
+			return;
+		}
+		if(!personajePuedePermitirse(item, personaje)) {
+			return;
+		}
+		cobrarOro(item, personaje);
+		entregarItem(item, personaje);
+		mostrarMensajeCompra(item);
+    }
+	
+    public void reclamarItemGratis(Personaje personaje) {
+        if (!itemGratisDisponible) {
+            System.out.println("Ya has reclamado el item gratuito de hoy.");
+            return;
         }
-	
-	   public void reclamarItem(Personajes personaje) {
-		   
-	        if (!itemGratisDisponible) {
-	            System.out.println("Ya reclamaste tu objeto gratuito.");
-	            return;
-	        }
+        entregarItem(itemGratisDelDia, personaje);
+        marcarItemGratisComoReclamado();
+        System.out.println("Has reclamado: " + itemGratisDelDia.getNombre() + " gratuitamente!");
+    }
 
-	        System.out.println("\nTu objeto gratuito de hoy es: " + itemRecompensa.getNombre());
-	        System.out.println(itemRecompensa.getDescripcion());
-	        entregarItem(itemRecompensa, personaje);
-	        marcarItemRecompensa();
-	        
-	    }
-	
 	public void inicializarCatalogo() {
 		// Consumibles
         catalogo.add(new Item("Poción menor",       "Recupera 30 de vida",             20,  TipoItem.Curacion_pequeña,    30));
@@ -120,10 +87,9 @@ public class Tienda {
 
     private void inicializarMensajes() {
     	
-        mensajesBienvenida.add("\"Bienvenido, espadachín. Aquí encontrarás lo que necesitas... si tienes oro.\"");
-        mensajesBienvenida.add("\"Los monstruos del eclipse no esperan. Compra rápido.\"");
-        mensajesBienvenida.add("\"He visto caer a mejores guerreros. Quizás esto te ayude a sobrevivir.\"");
-        mensajesBienvenida.add("\"El destino está escrito en tu marca. Pero el equipo correcto puede retrasar lo inevitable.\"");
+    	mensajesBienvenida.add("Bienvenido, viajero. Tengo lo que necesitas... por un precio.");
+        mensajesBienvenida.add("Otro aventurero en busca de poder. Adelante, echa un vistazo.");
+        mensajesBienvenida.add("Mi mercancía es la mejor del reino. No encontrarás mejor oferta.");
 	}
 	
 	public void mostrarMensajeBienvenida() {
@@ -137,38 +103,65 @@ public class Tienda {
 	}
 	
 	private boolean jugadorPuedePermitirse(Item item, Personajes personaje) {
-		return personaje.getOro() >= item.getPrecio();
 		
+		if(personaje.getOro() >= item.getPrecio()) {
+			return true;
+		}else {
+			System.out.println("No tienes suficiente oro. Necesitas: " + item.getPrecio() + " oro.");
+		}
 	}
 	
 	private void cobrarOro(Item item, Personajes personaje) {
 		
-		personaje.setOro(personaje.getOro() - item.getPrecio());
-        System.out.printf("Se han descontado " + item.getPrecio() + " de oro. Oro restante: " + personaje.getOro());
-        
-	}
-	
-	private void aplicarEfectoEquipo(Item item, Personajes personaje) {
-		
+        personaje.perderOro(item.getPrecio());
 	}
 	 
 	private void entregarItem(Item item, Personajes personaje) {
-		
+		personaje.getInventario().agregar(item);
 	}
 	
 	private boolean itemEstaEnCatalago(Item item) {
 		
+		if(catalogo.contains(item)) {
+			return true;
+		}else {
+			System.out.println("Ese item no está disponible en la tienda.");
+		}
 	}
 	
 	private Item generarItemRecompensa() {
 		
+		List<Item> posiblesGratis = new ArrayList<>();
+        posiblesGratis.add(new Pocion("Poción pequeña",  20, 0));
+        posiblesGratis.add(new Pocion("Poción de maná",   0, 30));
+        int indice = new Random().nextInt(posiblesGratis.size());
+        return posiblesGratis.get(indice);
 	}
 	
-	private void marcarItemRecompensa() {
+	private void marcarItemRecompensaComoReclamado() {
 	        this.itemGratisDisponible = false;
 	}
 	
+	private void mostrarItemGratis() {
+		
+		String estado = itemGratisDisponible ? "[Dispobile]" : "[Ya Reclamado]";
+		System.out.println("Item gratis - " + estado + " -: " + itemRecompensa.getNombre());
+	}
 	
+	private void mostrarStockDisponible() {
+        System.out.println("\n--- Catálogo ---");
+        for (Item item : catalogo) {
+            mostrarPrecio(item);
+        }
+    }
+
+    private void mostrarPrecio(Item item) {
+        System.out.println("  " + item.getNombre() + " ........... " + item.getPrecio() + " oro");
+    }
+
+    private void mostrarMensajeCompra(Item item) {
+        System.out.println("Has comprado: " + item.getNombre() + " por " + item.getPrecio() + " oro.");
+    }
 	
 	
 	

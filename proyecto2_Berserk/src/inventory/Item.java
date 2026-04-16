@@ -95,7 +95,7 @@ public abstract class Item {
 				tipo == TipoItem.Arma_espada_definitiva;
 	}
 	
-	
+	public abstract void usar();
 	
 	@Override
 	
